@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+    integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.1.2/sweetalert2.css" integrity="sha512-8543GQ3j5GD6UFe+71cFcnC1UfXISyhtxIqppx1rT21H/G/WP6YdgHHMCcaMoOCKTFasS2M0HzmXFTXmYSz4oA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    
+  </style>
+</head>
+
+<body>
+  
+  <div class="container">
+    <h1>Centres <button class="btn btn-primary" id="create-centre">Create</button> <button class="btn btn-danger btn-sm" style="float: right; margin-top:10px;" id="logout">Logout</button></h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Postal Code</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="centres-tbody">
+        
+      </tbody>
+    </table>    
+  </div>
+
+  <div class="container">
+    <h1>Nurses <button class="btn btn-primary" id="create-nurse">Create</button></h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">First Name</th>
+          <th scope="col">Last Name</th>
+          <th scope="col">Nurse ID</th>
+        </tr>
+      </thead>
+      <tbody id="nurses-tbody">
+        
+      </tbody>
+    </table>    
+  </div>
+
+  <div class="container">
+    <h1>Patients <button class="btn btn-primary" id="create-patient">Create</button></h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">First Name</th>
+          <th scope="col">Last Name</th>
+          <th scope="col">Phone</th>
+          <th scope="col">IC</th>
+        </tr>
+      </thead>
+      <tbody id="patients-tbody">
+        
+      </tbody>
+    </table>    
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+    integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"
+    integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.1.2/sweetalert2.min.js" integrity="sha512-2sjxi4MoP9Gn7QE0NhJdxOFVMK/qYsZO6JnO6pngGvck8p5UPwFX2LV5AsAMOQYgvbzMmki6sIqJ90YO3STAnA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script>
+    if (!localStorage.getItem("token")) {
+      window.location.href = "/login"
+    }
+
+    $.ajax({
+      type: "GET",
+      url: "/api/secure/centres",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      success: function (response) {
+        console.log(response);
+        let rowNum = 1;
+        let html = '';
+
+        response.data.forEach(centre => {
+          html += `<tr>
+                    <th scope="row">${rowNum}</th>
+                    <td>${centre.name}</td>
+                    <td>${centre.address.postalCode}</td>
+                    <td><a class="btn btn-sm btn-secondary" href="centres/${centre.id}">View</td>
+                  </tr>`
+        });
+
+        $('#centres-tbody').append(html);
+      },
+      error: function(jqXHR, error, errorThrown) {  
+        console.log(jqXHR)
+        if(jqXHR.status && jqXHR.status == 401){
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+      }
+    });
+
+    $.ajax({
+      type: "GET",
+      url: "/api/secure/nurses",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      success: function (response) {
+        console.log(response);
+        let rowNum = 1;
+        let html = '';
+
+        response.data.forEach(nurse => {
+          html += `<tr>
+                    <th scope="row">${rowNum}</th>
+                    <td>${nurse.firstName}</td>
+                    <td>${nurse.lastName}</td>
+                    <td>${nurse.nurseId}</td>
+                  </tr>`
+          rowNum++
+        });
+
+        $('#nurses-tbody').append(html);
+      },
+      error: function(jqXHR, error, errorThrown) {  
+        console.log(jqXHR)
+        if(jqXHR.status && jqXHR.status == 401){
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+      }
+    });
+
+    $.ajax({
+      type: "GET",
+      url: "/api/secure/patients",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      success: function (response) {
+        console.log(response);
+        let rowNum = 1;
+        let html = '';
+
+        response.data.forEach(patient => {
+          html += `<tr>
+                    <th scope="row">${rowNum}</th>
+                    <td>${patient.firstName}</td>
+                    <td>${patient.lastName}</td>
+                    <td>${patient.phone}</td>
+                    <td>${patient.icNumber}</td>
+                  </tr>`
+          rowNum++
+        });
+
+        $('#patients-tbody').append(html);
+      },
+      error: function(jqXHR, error, errorThrown) {  
+        console.log(jqXHR)
+        if(jqXHR.status && jqXHR.status == 401){
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+      }
+    });
+
+    $('#create-centre').click(()=> {
+      Swal.fire({
+        title: 'Create Centre',
+        html: `<input type="text" id="name" class="swal2-input" placeholder="Name">
+        <input type="text" id="line1" class="swal2-input" placeholder="Line 1">
+        <input type="text" id="line2" class="swal2-input" placeholder="Line 2">
+        <input type="text" id="postalCode" class="swal2-input" placeholder="Postal Code">`,
+        confirmButtonText: 'Create',
+        focusConfirm: false,
+        preConfirm: () => {
+          const name = Swal.getPopup().querySelector('#name').value
+          const line1 = Swal.getPopup().querySelector('#line1').value
+          const line2 = Swal.getPopup().querySelector('#line2').value
+          const postalCode = Swal.getPopup().querySelector('#postalCode').value
+          if (!name || !line1 || !line2 || !postalCode) {
+            Swal.showValidationMessage(`Please enter all the information`)
+          }
+          return { name: name, address: { line1, line2, postalCode} }
+        }
+      }).then((result) => {
+        $.ajax({
+          type: "POST",
+          url: "/api/secure/centres",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          data: result.value,
+          success: function (response) {
+            console.log(response);
+            window.location.reload(false);
+          },
+          error: function(jqXHR, error, errorThrown) {  
+            console.log(jqXHR)
+            if(jqXHR.status && jqXHR.status == 401){
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }
+          }
+        });
+      });
+    });
+
+    $('#create-nurse').click(()=> {
+      Swal.fire({
+        title: 'Create Nurse',
+        html: `<input type="text" id="firstName" class="swal2-input" placeholder="First Name">
+        <input type="text" id="lastName" class="swal2-input" placeholder="Last Name">
+        <input type="text" id="nurseId" class="swal2-input" placeholder="Nurse ID">`,
+        confirmButtonText: 'Create',
+        focusConfirm: false,
+        preConfirm: () => {
+          const firstName = Swal.getPopup().querySelector('#firstName').value
+          const lastName = Swal.getPopup().querySelector('#lastName').value
+          const nurseId = Swal.getPopup().querySelector('#nurseId').value
+          if (!firstName || !lastName || !nurseId) {
+            Swal.showValidationMessage(`Please enter all the information`)
+          }
+          return { firstName: firstName, lastName: lastName, nurseId: nurseId }
+        }
+      }).then((result) => {
+        $.ajax({
+          type: "POST",
+          url: "/api/secure/nurses",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          data: result.value,
+          success: function (response) {
+            console.log(response);
+            window.location.reload(false);
+          },
+          error: function(jqXHR, error, errorThrown) {  
+            console.log(jqXHR)
+            if(jqXHR.status && jqXHR.status == 401){
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }
+          }
+        });
+      });
+    });
+
+    $('#create-patient').click(()=> {
+      Swal.fire({
+        title: 'Create Nurse',
+        html: `<input type="text" id="firstName" class="swal2-input" placeholder="First Name">
+        <input type="text" id="lastName" class="swal2-input" placeholder="Last Name">
+        <input type="text" id="phone" class="swal2-input" placeholder="Phone">
+        <input type="text" id="icNumber" class="swal2-input" placeholder="IC">`,
+        confirmButtonText: 'Create',
+        focusConfirm: false,
+        preConfirm: () => {
+          const firstName = Swal.getPopup().querySelector('#firstName').value
+          const lastName = Swal.getPopup().querySelector('#lastName').value
+          const phone = Swal.getPopup().querySelector('#phone').value
+          const icNumber = Swal.getPopup().querySelector('#icNumber').value
+          if (!firstName || !lastName || !phone || !icNumber) {
+            Swal.showValidationMessage(`Please enter all the information`)
+          }
+          return { firstName: firstName, lastName: lastName, phone: phone, icNumber: icNumber }
+        }
+      }).then((result) => {
+        $.ajax({
+          type: "POST",
+          url: "/api/secure/patients",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          data: result.value,
+          success: function (response) {
+            console.log(response);
+            window.location.reload(false);
+          },
+          error: function(jqXHR, error, errorThrown) {  
+            console.log(jqXHR)
+            if(jqXHR.status && jqXHR.status == 401){
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }
+          }
+        });
+      });
+    });
+
+    $('#logout').click(() => {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    })
+  </script>
+</body>
+
+</html>
