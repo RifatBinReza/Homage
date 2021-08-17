@@ -43,7 +43,7 @@
   ```
 
 ## Docker
-- in terminal, run this command inside the project directory to start docker. (Wouldn't connect to the internal postgres db because of some network config which needs to be fixed)
+- in terminal, run this command inside the project directory to start docker. (Wouldn't connect to the internal postgres db because of some network config which needs to be fixed. Please try manual installation with a local postgres db from the .env.example and run the server with npm)
 
   ```sh
   $ docker-compose build;
